@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>SNMP Protocol</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+    table, th, td {
+        border: 1px solid;
+        border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+</style>
+<script>
+    function getTCPTable(id){
+        var d = fetch('get_tcptable.php',
+        {method:"POST"})
+        .then(response => response.json())
+        .then(json => {
+            document.getElementById(id).innerHTML="";
+            for(var key in json){
+                var string = json[key].split(",");
+                document.getElementById(id).innerHTML +=
+                `<tr><td>${string[0]}</td><td>${string[1]}</td><td>${string[2]}</td><td>${string[3]}</td><td>${string[4]}</td><td>${string[5]}</td></tr>`;
+            }
+        });
+    }
+
+    
+
+    function getARPTable(id){
+        var d = fetch('get_arptable.php',
+        {method:"POST"})
+        .then(response => response.json())
+        .then(json => {
+            document.getElementById(id).innerHTML="";
+            for(var key in json){
+                var string = json[key].split(",");
+                document.getElementById(id).innerHTML +=
+                `<tr><td>${string[0]}</td><td>${string[1]}</td><td>${string[2]}</td><td>${string[3]}</td></tr>`;
+            }
+        });
+    }
+
+
+    function getSystemGroup(id){
+        var d = fetch('get_systemgrp.php',
+        {
+            method:"POST"
+        })
+        .then(response => response.json())
+        .then(json =>{
+            document.getElementById(id).innerHTML="";
+            var i = 0;
+            for(var key in json){
+                document.getElementById(id).innerHTML+="<tr>"+
+                    "<td>"+i+"</td>"+
+                    "<td>"+key+"</td>"+
+                    "<td>"+json[key]+"</td>"+
+                    "</tr>";
+                i++;
+            }
+        });
+    }
+    
+    function changeSystemGroup(contactParam,locationParam){
+        var d = fetch(`set_systemgrp.php?contact=${encodeURIComponent(contactParam)}&location=${encodeURIComponent(locationParam)}`,
+        {
+            method:"GET",
+        }).then(response => {
+            console.log(response);
+        });
+    }
+    //changeSystemGroup("Test JS","Nablus");
+
+    let cPage = 0;
+
+    function switchTab(page){
+        cPage = page;
+        switch(page){
+            case 0:
+                getSystemGroup('sysGroupB');
+                document.getElementById("sysGroup").style.display = "block";
+                 document.getElementById("arp").style.display = "none";
+                document.getElementById("tcp").style.display = "none";
+            break;
+           
+            case 2:
+                getARPTable("ARP");
+                document.getElementById("sysGroup").style.display = "none";
+                document.getElementById("arp").style.display = "block";
+                document.getElementById("tcp").style.display = "none";
+            break;
+            case 3:
+                getTCPTable("TCP");
+                document.getElementById("sysGroup").style.display = "none";
+                document.getElementById("arp").style.display = "none";
+                document.getElementById("tcp").style.display = "block";
+            break;
+        }
+    }
+    
+</script>
+
+<style>
+    #sysGroup{
+        display:none;
+    }
+    #ip{
+        display:none;
+    }
+    #arp{
+        display:none;
+    }
+    #tcp{
+        display:none;
+    }
+</style>
+
+<body style="text-align:center">
+<div style="text-align:center">
+    <h1>SNMP Protocol</h1>
+</div>
+<div style="text-align:center">
+    <button onclick="switchTab(0);">System Group</button>
+    <button onclick="switchTab(2);">ARP Table</button>
+    <button onclick="switchTab(3);">TCP Table</button>
+</div>
+
+<div id="sysGroup">
+    <div>
+        <p>
+            System Group
+        </p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody id="sysGroupB">
+        </tbody>
+    </table>
+    <div>
+        <div>New System Contact: <input type="text" id="syscon"></div>
+        <div>New System Location:<input type="text" id="sysloc"></div>
+        <button onclick="changeSystemGroup(document.getElementById('syscon').value,document.getElementById('sysloc').value);">Change System info</button>
+    </div>
+</div>
+
+
+
+<div id="arp">
+    <div>
+        <p>
+            ARP Table
+        </p>
+    </div>
+    <table>
+        <thead>
+            <th>0</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+        </thead>
+        <tbody id = "ARP"></tbody>
+    </table>
+</div>
+
+<div id="tcp">
+    <table>
+        <div>
+            <p>
+                TCP Table
+            </p>
+        </div>
+        <thead>
+            <th>0</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+        </thead>
+        <tbody id = "TCP"></tbody>
+    </table>
+</div>
+
+</body>
+</html>
